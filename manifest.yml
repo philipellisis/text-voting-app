@@ -1,6 +1,11 @@
 applications:
-  - name: app-name
+  - name: survey-dev
     command: node app.js
     memory: 128M
+    OPTIMIZE_MEMORY: true
     buildpack: nodejs_buildpack
+    env:
+      ACCOUNT_SID: {twilio account sid}
+      AUTH_TOKEN: {twilio auth token}
+      AUTH: Basic {endpoint auth}
     
