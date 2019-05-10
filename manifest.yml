@@ -1,0 +1,6 @@
+applications:
+  - name: survey-dev
+    command: node app.js
+    memory: 128M
+    buildpack: nodejs_buildpack
+    
