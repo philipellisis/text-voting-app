@@ -12,7 +12,9 @@
             "env": {
                 "ACCOUNT_SID" : "{twilio account sid}",
                 "AUTH_TOKEN" : "{twilio auth token}",
-                "AUTH" : "Basic {endpoint auth}"
+                "AUTH" : "Basic {endpoint auth}",
+                "ENV" : "development",
+                "REPLY_NUMBER" : ""
             }
         }
     ]

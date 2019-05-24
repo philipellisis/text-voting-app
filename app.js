@@ -6,14 +6,16 @@ var bodyParser  =     require('body-parser');
 var accountSid = process.env.ACCOUNT_SID; 
 var authToken = process.env.AUTH_TOKEN; 
 var auth = process.env.AUTH;
+var environment = process.env.ENV;
+var phoneNumber = process.env.REPLY_NUMBER;
 
 //require the Twilio module and create a REST client 
 var twillio = require('twilio')(accountSid, authToken); 
 var surveyResults = {};
-var surveySetup = {};
+var surveySetup = [];
 
 //check environment and initialize variables appropriately
-console.log('******************survey counter started******************');
+console.log('******************survey counter started on ' + environment + ' ******************');
 
 
 
@@ -32,32 +34,35 @@ app.post("/text", function (request, response) {
       response.status(401).send("Unauthorized");
     } else {
       let surveyOptions = "";
-      for (x in surveySetup) {
-        surveyOptions = surveyOptions + '"' + surveySetup[x].id + '" for ' + surveySetup[x].name + '\n'
+      for (const x of surveySetup) {
+        surveyOptions = surveyOptions + '"' + x.id + '" for ' + x.name + '\n'
       }
       let messageText = "Unknown vote has been cast, please text the following: \n" + surveyOptions
       if(surveyResults[request.body.From] === undefined) {
-        for (x in surveySetup) {
-          if(surveySetup[x].name.toUpperCase() === request.body.Body.toUpperCase() || surveySetup[x].id.toUpperCase() === request.body.Body.toUpperCase()){
-            messageText = "vote has been cast for " + surveySetup[x].name
-            surveyResults[request.body.From] = x
+        for (const x of surveySetup) {
+          if(x.name.toUpperCase() === request.body.Body.toUpperCase() || x.id.toUpperCase() === request.body.Body.toUpperCase()){
+            messageText = "vote has been cast for " + x.name
+            surveyResults[request.body.From] = x.id
           }
         }
       } else {
-        for (x in surveySetup) {
-          if(surveySetup[x].name.toUpperCase() === request.body.Body.toUpperCase() || surveySetup[x].id.toUpperCase() === request.body.Body.toUpperCase()){
-            messageText = "vote has been changed from " + surveySetup[surveyResults[request.body.From]].name + " to " + surveySetup[x].name
-            surveyResults[request.body.From] = x
+        for (const x of surveySetup) {
+          if(x.name.toUpperCase() === request.body.Body.toUpperCase() || x.id.toUpperCase() === request.body.Body.toUpperCase()){
+            messageText = "vote has been changed from " + surveySetup[surveyResults[request.body.From]].name + " to " + x.name
+            surveyResults[request.body.From] = x.id
           }
         }
       }
-  
-      twillio.messages.create({ 
-        to: request.body.From, 
-        from: "+12162085774", 
-        body: messageText, 
-      }).then(message => console.log(message));;
-  
+      if(environment === 'production') {
+        console.log('sending message: ' + messageText + ' to twillio');
+        twillio.messages.create({ 
+          to: request.body.From, 
+          from: phoneNumber, 
+          body: messageText, 
+        }).then(message => console.log(message));;
+      } else {
+        console.log('not sending message to twillio because environment is ' + environment);
+      }
       response.send(messageText);
     }
 
@@ -67,8 +72,19 @@ app.post("/text", function (request, response) {
     if(request.headers.authorization !== auth) {
       response.status(401).send("Unauthorized");
     } else {
+      let surveyOutput = [];
+      for (const x of surveySetup) {
+        let count = 0;
+        for (y in surveyResults) {
+          if(x.id === surveyResults[y]) {
+            count++;
+          }
+        }
+        surveyOutput.push({name: x.name, number: count, id: x.id});
+      }
+
       response.status = 200;
-      response.send(surveyResults);
+      response.send(surveyOutput);
     }
 
   })

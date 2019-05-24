@@ -8,4 +8,6 @@ applications:
       ACCOUNT_SID: {twilio account sid}
       AUTH_TOKEN: {twilio auth token}
       AUTH: Basic {endpoint auth}
+      ENV: production
+      REPLY_NUMBER: {reply phone number}
     
