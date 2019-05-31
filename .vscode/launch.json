@@ -14,7 +14,8 @@
                 "AUTH_TOKEN" : "{twilio auth token}",
                 "AUTH" : "Basic {endpoint auth}",
                 "ENV" : "development",
-                "REPLY_NUMBER" : ""
+                "REPLY_NUMBER" : "",
+                "VCAP_SERVICES" : "{\"rediscloud\":[{\"credentials\":{\"port\":\"6379\",\"hostname\":\"127.0.0.1\"}}]}"
             }
         }
     ]
